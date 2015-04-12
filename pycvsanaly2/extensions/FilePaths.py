@@ -134,7 +134,7 @@ class FilePaths:
 
         while id != -1:
             tokens.insert(0, adj.files[id])
-            id = adj.adj[id]
+            id = adj.adj.get(id,-1)
 
         profiler_stop("Building path for file %d", (file_id,), True)
 
