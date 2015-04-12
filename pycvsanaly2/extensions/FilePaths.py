@@ -149,7 +149,6 @@ class FilePaths:
         path = self.__build_path(file_id, adj)
 
         profiler_stop("Getting path for file %d at commit %d", (file_id, commit_id), True)
-
         return path
 
     def get_filename(self, file_id):
@@ -169,7 +168,7 @@ if __name__ == '__main__':
     from pycvsanaly2.Database import create_database
     from pycvsanaly2.Config import Config
 
-    db = create_database('sqlite', sys.argv[1])
+    db = create_database('mysql', sys.argv[1], 'lashchyk', '', 'localhost')
     cnn = db.connect()
 
     fp = FilePaths(db)
@@ -178,6 +177,8 @@ if __name__ == '__main__':
     config.profile = True
 
     cursor = cnn.cursor()
+    insertCursor = cnn.cursor()
+
     cursor.execute("select s.id, file_id from scmlog s, actions a where s.id = a.commit_id")
     old_id = -1
     for id, file_id in cursor.fetchall():
@@ -186,7 +187,9 @@ if __name__ == '__main__':
             fp.update_for_revision(cursor, id, 1)
             old_id = id
         print fp.get_path(file_id, id, 1)
-
+        insertCursor.execute("insert into file_path (commit_id, file_id, current_path) values ('%d', '%d', '%s')" % (id, file_id, fp.get_path(file_id, id, 1)))
+    cnn.commit()
+    insertCursor.close()
     cursor.close()
 
     cnn.close()
