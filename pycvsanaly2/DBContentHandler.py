@@ -18,9 +18,10 @@
 #       Carlos Garcia Campos <carlosgc@gsyc.escet.urjc.es>
 
 import os
+import re
 
 from ContentHandler import ContentHandler
-from Database import (DBRepository, DBLog, DBFile, DBFileLink, DBAction,
+from Database import (DBRepository, DBLog,DBIssueCommitLink, DBFile, DBFileLink, DBAction,
                       DBFileCopy, DBBranch, DBPerson, DBTag, DBTagRev,
                       DBGraph, statement)
 from profile import profiler_start, profiler_stop
@@ -157,6 +158,12 @@ class DBContentHandler(ContentHandler):
                 for c in self.commits]
             profiler_start("Inserting commits for repository %d", (self.repo_id,))
             cursor.executemany(statement(DBLog.__insert__, self.db.place_holder), commits)
+	    p = re.compile('((?:(?:OA)|(?:CCIESC))-\d+)', re.IGNORECASE)
+            for commit in commits:
+		m = p.findall(commit[8])
+		for bug in m:
+		   issue_commit_link=(commit[0], bug)
+                   cursor.execute(statement(DBIssueCommitLink.__insert__, self.db.place_holder), issue_commit_link)
             self.commits = []
             profiler_stop("Inserting commits for repository %d", (self.repo_id,))
 

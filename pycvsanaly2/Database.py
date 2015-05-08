@@ -19,7 +19,6 @@
 
 from utils import to_unicode, printdbg
 
-
 class DBRepository:
 
     id_counter = 1
@@ -37,6 +36,14 @@ class DBRepository:
         self.name = to_unicode(name)
         self.type = to_unicode(type)
 
+
+class DBIssueCommitLink:
+
+    __insert__ = "INSERT INTO issue_commit_link (commit_id, issue) values (?, ?)"
+
+    def __init__(self, issue_commit_link):
+        self.commit_id = issue_commit_link.commit_id
+        self.issue = issue_commit_link.issue
 
 class DBLog:
     id_counter = 1
@@ -59,10 +66,10 @@ class DBLog:
         self.author_date_tz = commit.author_date_tz
         self.message = to_unicode(commit.message)
         self.composed_rev = commit.composed_rev
-        
+
 class DBGraph:
-    
-    __insert__ = "INSERT INTO commit_graph (commit_id, parent_id) values (?, ?)"
+
+     __insert__ = "INSERT INTO commit_graph (commit_id, parent_id) values (?, ?)"
 
 
 class DBFile:
@@ -545,6 +552,12 @@ class MysqlDatabase(Database):
                            "FOREIGN KEY (committer_id) REFERENCES people(id)," +
                            "FOREIGN KEY (author_id) REFERENCES people(id)," +
                            "FOREIGN KEY (repository_id) REFERENCES repositories(id)" +
+                           ") ENGINE=MyISAM" +
+                           " CHARACTER SET=utf8")
+            cursor.execute("CREATE TABLE issue_commit_link (" +
+                           "commit_id INT," +
+                           "issue varchar(255)," +
+			   "FOREIGN KEY (commit_id) REFERENCES scmlog(id)" +
                            ") ENGINE=MyISAM" +
                            " CHARACTER SET=utf8")
             cursor.execute("CREATE TABLE files (" +
