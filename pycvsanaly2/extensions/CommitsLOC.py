@@ -110,9 +110,9 @@ class SVNLineCounter(LineCounter):
         diff_data = [""]
         wid = self.repo.add_watch(DIFF, diff_line, diff_data)
         try:
-            self.repo.diff(self.repo.get_uri(), revs=revs)
+            self.repo.diff(self.repo.get_uri(), revs=revs, no_whitespace=True)
         except Exception, e:
-            printerr("Error running svn diff command: %s", (str(e)))
+            printerr("Error running svn diff command: %s", [str(e)])
             self.repo.remove_watch(DIFF, wid)
             return (0, 0)
 
